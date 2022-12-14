@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="img/dot.png" />
+    <title>Tinka 2022</title>
+  </head>
+  <body>
+    <div class="logo"></div>
+    <div class="container"></div>
+
+    <script>
+      const card = (num) => `<div class="card flipped">
+    <span class="inner-card-cover">
+      <span class="image">
+        <span class="unflip"></span>
+      </span>
+    </span>
+    <span class="inner-card" style="background-image: url(img/${num}.png)">
+      <span class="flip"></span>
+      <span class="glare"></span>
+    </span>
+  </div>
+  `;
+
+      const output = [];
+      for (let i = 0; i < 51; i++) {
+        output.push(card(i + 1));
+      }
+
+      document.querySelector(".container").innerHTML = output.join("");
+    </script>
+
+    <div class="disclaimer">© TV 2 MARKETING 2022. ALL RIGHTS RESERVED.</div>
+
+    <script>
+      const calculateAngle = (e, item, parent) => {
+        let dropShadowColor = `rgba(0, 0, 0, 0.3)`;
+        if (parent.getAttribute("data-filter-color") !== null) {
+          dropShadowColor = parent.getAttribute("data-filter-color");
+        }
+
+        parent.classList.add("animated");
+        // Get the x position of the users mouse, relative to the button itself
+        let x = Math.abs(item.getBoundingClientRect().x - e.clientX);
+        // Get the y position relative to the button
+        let y = Math.abs(item.getBoundingClientRect().y - e.clientY);
+
+        // Calculate half the width and height
+        let halfWidth = item.getBoundingClientRect().width / 2;
+        let halfHeight = item.getBoundingClientRect().height / 2;
+
+        // Use this to create an angle. I have divided by 6 and 4 respectively so the effect looks good.
+        // Changing these numbers will change the depth of the effect.
+        let calcAngleX = (x - halfWidth) / 6;
+        let calcAngleY = (y - halfHeight) / 14;
+
+        let gX = (1 - x / (halfWidth * 2)) * 100;
+        let gY = (1 - y / (halfHeight * 2)) * 100;
+
+        // Add the glare at the reflection of where the user's mouse is hovering
+        item.querySelector(
+          ".glare"
+        ).style.background = `radial-gradient(circle at ${gX}% ${gY}%, rgb(199 198 243), transparent)`;
+        // And set its container's perspective.
+        parent.style.perspective = `${halfWidth * 6}px`;
+        item.style.perspective = `${halfWidth * 6}px`;
+
+        // Set the items transform CSS property
+        item.style.transform = `rotateY(${calcAngleX}deg) rotateX(${-calcAngleY}deg) scale(1.04)`;
+        parent.querySelector(
+          ".inner-card-cover"
+        ).style.transform = `rotateY(${calcAngleX}deg) rotateX(${-calcAngleY}deg) scale(1.04) translateZ(-4px)`;
+
+        if (parent.getAttribute("data-custom-perspective") !== null) {
+          parent.style.perspective = `${parent.getAttribute(
+            "data-custom-perspective"
+          )}`;
+        }
+
+        // Reapply this to the shadow, with different dividers
+        let calcShadowX = (x - halfWidth) / 3;
+        let calcShadowY = (y - halfHeight) / 6;
+
+        // Add a filter shadow - this is more performant to animate than a regular box shadow.
+        item.style.filter = `drop-shadow(${-calcShadowX}px ${-calcShadowY}px 15px ${dropShadowColor})`;
+      };
+
+      document.querySelectorAll(".card").forEach(function (item) {
+        // For flipping the card backwards and forwards
+        if (item.querySelector(".flip") !== null) {
+          item.querySelector(".flip").addEventListener("click", function () {
+            item.classList.add("flipped");
+          });
+        }
+
+        // For 'unflipping' the card.
+        if (item.querySelector(".unflip") !== null) {
+          item.querySelector(".unflip").addEventListener("click", function () {
+            item.classList.remove("flipped");
+          });
+        }
+
+        // For when the user's mouse 'enters' the card
+        item.addEventListener("mouseenter", function (e) {
+          calculateAngle(e, this.querySelector(".inner-card"), this);
+        });
+
+        // For when the users mouse moves on top of the card
+        item.addEventListener("mousemove", function (e) {
+          calculateAngle(e, this.querySelector(".inner-card"), this);
+        });
+
+        // For when the user's mouse leaves the card.
+        item.addEventListener("mouseleave", function (e) {
+          let dropShadowColor = `rgba(0, 0, 0, 0.3)`;
+          if (item.getAttribute("data-filter-color") !== null) {
+            dropShadowColor = item.getAttribute("data-filter-color");
+          }
+          item.classList.remove("animated");
+          item.querySelector(
+            ".inner-card"
+          ).style.transform = `rotateY(0deg) rotateX(0deg) scale(1)`;
+          item.querySelector(
+            ".inner-card-cover"
+          ).style.transform = `rotateY(0deg) rotateX(0deg) scale(1.01) translateZ(-4px)`;
+          item.querySelector(
+            ".inner-card"
+          ).style.filter = `drop-shadow(0 10px 15px ${dropShadowColor})`;
+        });
+      });
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-image: url(img/tinka-bg.png);
+        background-size: cover;
+        background-attachment: fixed;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+      }
+
+      .logo {
+        margin: 0 auto;
+        display: block;
+        width: 400px;
+        filter: drop-shadow(0 4px 8px #222);
+        background-image: url("img/logo-small-no-dot.png");
+        height: 188px;
+        position: relative;
+      }
+
+      .logo::after {
+        content: "";
+        background-image: url("img/dot.png");
+        background-size: contain;
+        position: absolute;
+        top: 5px;
+        left: 85px;
+        width: 45px;
+        height: 45px;
+        animation: rotate 12s linear infinite;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .disclaimer {
+        background: rgba(0, 0, 0, 0.5);
+        color: #eee;
+        padding: 8px;
+        text-align: left;
+        font-size: 0.7rem;
+      }
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 64px auto;
+        flex-wrap: wrap;
+        gap: 32px;
+        row-gap: 48px;
+        max-width: 1300px;
+      }
+
+      .card {
+        width: 128px;
+        height: 200px;
+        background: transparent;
+        box-shadow: none;
+        backface-visibility: visible;
+        transform-style: preserve-3d;
+        transition: all 0.2s ease-out;
+        transform: scale(1.2);
+        z-index: 2;
+      }
+      .flip,
+      .unflip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        cursor: pointer;
+      }
+      .inner-card-cover {
+        transform: rotateX(0) rotateY(0deg) scale(1) translateZ(-4px);
+        border-radius: 4px;
+        background-image: url("img/cover.png");
+        background-size: cover;
+        position: absolute;
+        top: 0;
+        color: white;
+        box-sizing: border-box;
+        transition: all 0.15s ease-out;
+        will-change: transform, filter;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .inner-card-cover .image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 4px;
+        height: 100%;
+        transform: rotateY(180deg);
+        background-size: auto 102%;
+        background-position: -2px -5px;
+      }
+      .card .inner-card {
+        top: 0;
+        height: 100%;
+        will-change: transform, filter;
+        background-size: calc(100% + 6px) auto;
+        background-position: -3px -3px;
+        transition: all 0.15s ease-out;
+        border-radius: 4px;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: block;
+        margin: 0px auto;
+        transform: rotateX(0deg) rotateY(0deg) scale(1);
+        perspective-origin: 0 0;
+        filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.3));
+      }
+      .card .glare {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        z-index: 9999;
+        pointer-events: none;
+        border-radius: 14px;
+        mix-blend-mode: hard-light;
+        transition: all 0.1s ease-out;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgb(255 255 255),
+          transparent
+        );
+      }
+      .card.animated .glare {
+        opacity: 0.3;
+      }
+      .card.flipped {
+        transform: rotateY(180deg);
+        z-index: 0;
+      }
+      .card.flipped .inner-card {
+        opacity: 0;
+      }
+      .card .flip-inner-card {
+        transform: rotateY(180deg);
+        position: absolute;
+        top: 0;
+        box-sizing: border-box;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </body>
+</html>
